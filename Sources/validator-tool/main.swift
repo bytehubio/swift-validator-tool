@@ -70,7 +70,7 @@ struct ValidatorTool: ParsableCommand {
     static var configuration = CommandConfiguration(
         abstract: "A utility",
         version: "1.0.0",
-        subcommands: [GetDepoolParticipantInfo.self, Run.self],
+        subcommands: [SendMessage.self, Run.self],
         defaultSubcommand: nil
     )
 }
