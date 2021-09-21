@@ -73,6 +73,7 @@ func paramsJsonToDictionary(_ params: String) throws -> Any? {
     return dict
 }
 
+
 private func booleaFix(_ data: Any?) -> Any? {
     if var temp = data as? [Any?] {
         for (index, value) in temp.enumerated() {
@@ -85,10 +86,12 @@ private func booleaFix(_ data: Any?) -> Any? {
         }
         return temp
     } else {
-        if data as? NSNumber === kCFBooleanTrue {
-            return true
-        } else if data as? NSNumber === kCFBooleanFalse {
-            return false
+        if let data = data as? NSNumber, type(of: data) == type(of: NSNumber(value: true)) {
+            if data == NSNumber(value: 1) {
+                return true
+            } else {
+                return false
+            }
         } else {
             return data
         }
