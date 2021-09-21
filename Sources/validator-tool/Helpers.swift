@@ -45,12 +45,52 @@ func readTvc(_ relativeFilePath: String) -> Data {
     return data
 }
 
-func sdk(endpoints: [String]? = nil) -> TSDKClientModule {
-    let defaultEndpoints: [String] = [
-        "https://rustnet1.ton.dev",
-        "https://rustnet2.ton.dev"
-    ]
-    var config: TSDKClientConfig = .init()
-    config.network = TSDKNetworkConfig(endpoints: endpoints ?? defaultEndpoints)
-    return TSDKClientModule(config: config)
+//func sdk(endpoints: [String]? = nil) throws -> TSDKClientModule {
+//    let defaultEndpoints: [String] = [
+//        "https://rustnet1.ton.dev",
+//        "https://rustnet2.ton.dev"
+//    ]
+//    var config: TSDKClientConfig = .init()
+//    config.network = TSDKNetworkConfig(endpoints: endpoints ?? defaultEndpoints)
+//    return try TSDKClientModule(config: config)
+//}
+
+func paramsJsonToDictionary(_ params: String) throws -> [String: Any?] {
+    guard let data: Data = params.data(using: .utf8)
+    else { fatalError("Bad params json, it must be valid json") }
+    var dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String : Any?]
+    dict = booleaFix(dict) as? [String: Any?]
+
+    return dict ?? [:]
+}
+
+func paramsJsonToDictionary(_ params: String) throws -> Any? {
+    guard let data: Data = params.data(using: .utf8)
+    else { fatalError("Bad params json, it must be valid json") }
+    var dict: Any? = try JSONSerialization.jsonObject(with: data, options: [])
+    dict = booleaFix(dict)
+
+    return dict
+}
+
+private func booleaFix(_ data: Any?) -> Any? {
+    if var temp = data as? [Any?] {
+        for (index, value) in temp.enumerated() {
+            temp[index] = booleaFix(value)
+        }
+        return temp
+    } else if var temp = data as? [String: Any] {
+        for key in temp.keys {
+            temp[key] = booleaFix(temp[key])
+        }
+        return temp
+    } else {
+        if data as? NSNumber === kCFBooleanTrue {
+            return true
+        } else if data as? NSNumber === kCFBooleanFalse {
+            return false
+        } else {
+            return data
+        }
+    }
 }

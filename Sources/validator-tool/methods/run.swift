@@ -15,23 +15,35 @@ extension ValidatorTool {
 
         @OptionGroup var options: ValidatorToolOptions
 
-        @Option(name: [.long, .customShort("a")], help: "Account address")
+        @Option(name: [.long, .customShort("d")], help: "Account address")
         var addr: String
 
         @Option(name: [.long, .customShort("m")], help: "Calling method")
         var method: String
 
-        @Option(name: [.long, .customShort("p")], help: "Params")
+        @Option(name: [.long, .customShort("j")], help: "Params")
         var paramsJSON: String = "{}"
 
-        @Option(name: [.long, .customShort("b")], help: "Path to abi file")
+        @Option(name: [.long, .customShort("a")], help: "Path to abi file")
         var abiPath: String
 
+        @Option(name: [.long, .customShort("b")], help: "Boc")
+        var boc: String = ""
+
         public func run() throws {
+            if boc.isEmpty {
+                try makeResult()
+            } else {
+                try makeResultWithBoc()
+            }
+        }
+
+        @discardableResult
+        func makeResult() throws -> String {
             try setClient(options: options)
+            var functionResult: String = ""
             let group: DispatchGroup = .init()
             group.enter()
-            defer { group.wait() }
 
             let paramsOfWaitForCollection: TSDKParamsOfWaitForCollection = .init(collection: "accounts",
                                                                                  filter: [
@@ -41,18 +53,19 @@ extension ValidatorTool {
                                                                                  ].toAnyValue(),
                                                                                  result: "boc",
                                                                                  timeout: nil)
-            client.net.wait_for_collection(paramsOfWaitForCollection) { result in
-                if let error = result.error {
+
+            client.net.wait_for_collection(paramsOfWaitForCollection) { response in
+                if let error = response.error {
                     fatalError( error.localizedDescription )
                 }
-                if result.finished {
+                if response.finished {
                     var params: AnyValue!
                     do {
                         params = try paramsJsonToDictionary(paramsJSON).toAnyValue()
                     } catch {
                         fatalError( error.localizedDescription )
                     }
-                    if let anyResult = result.result?.result.toAny() as? [String: Any] {
+                    if let anyResult = response.result?.result.toAny() as? [String: Any] {
                         guard let boc: String = anyResult["boc"] as? String
                         else { fatalError("Receive result, but Boc not found") }
 
@@ -70,27 +83,29 @@ extension ValidatorTool {
                             processing_try_index: nil
                         )
 
-                        client.abi.encode_message(paramsOfEncodeMessage) { result in
-                            if let error = result.error {
+                        client.abi.encode_message(paramsOfEncodeMessage) { response in
+                            if let error = response.error {
                                 fatalError( error.localizedDescription )
                             }
-                            if result.finished {
-                                let message: String = result.result!.message
+                            if response.finished {
+                                let message: String = response.result!.message
                                 let paramsOfRunTvm: TSDKParamsOfRunTvm = .init(message: message,
                                                                                account: boc,
                                                                                execution_options: nil,
                                                                                abi: TSDKAbi(type: .Serialized, value: abi),
                                                                                boc_cache: nil,
                                                                                return_updated_account: nil)
-                                client.tvm.run_tvm(paramsOfRunTvm) { result in
-                                    if let error = result.error {
+
+
+                                client.tvm.run_tvm(paramsOfRunTvm) { response in
+                                    if let error = response.error {
                                         fatalError( error.localizedDescription )
                                     }
-                                    if result.finished {
-                                        let tvmResult: TSDKResultOfRunTvm = result.result!
+                                    if response.finished {
+                                        let tvmResult: TSDKResultOfRunTvm = response.result!
                                         guard let output: String = tvmResult.decoded?.output?.toJSON()
                                         else { fatalError( "output not defined" ) }
-                                        print(output)
+                                        functionResult = output
                                         group.leave()
                                     }
                                 }
@@ -101,14 +116,73 @@ extension ValidatorTool {
                     }
                 }
             }
+            group.wait()
+
+            let stdout: FileHandle = FileHandle.standardOutput
+            stdout.write(functionResult.trimmingCharacters(in: .whitespacesAndNewlines).data(using: .utf8) ?? Data())
+            return functionResult
         }
 
-        private func paramsJsonToDictionary(_ params: String) throws -> [String: Any] {
-            guard let data: Data = params.data(using: .utf8)
-            else { fatalError("Bad params json, it must be valid json") }
-            let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String : Any]
+        @discardableResult
+        func makeResultWithBoc() throws -> String {
+            try setClient(options: options)
+            var functionResult: String = ""
+            let group: DispatchGroup = .init()
+            group.enter()
 
-            return json ?? [:]
+            var params: AnyValue!
+            do {
+                params = try paramsJsonToDictionary(paramsJSON).toAnyValue()
+            } catch {
+                fatalError( error.localizedDescription )
+            }
+
+
+            let abi: AnyValue = readAbi(abiPath)
+            let paramsOfEncodeMessage: TSDKParamsOfEncodeMessage = .init(
+                abi: .init(type: .Serialized, value: abi),
+                address: addr,
+                deploy_set: nil,
+                call_set: .init(
+                    function_name: method,
+                    header: nil,
+                    input: params
+                ),
+                signer: .init(type: .None),
+                processing_try_index: nil
+            )
+
+            client.abi.encode_message(paramsOfEncodeMessage) { response in
+                if let error = response.error {
+                    fatalError( error.localizedDescription )
+                }
+                if response.finished {
+                    let message: String = response.result!.message
+                    let paramsOfRunTvm: TSDKParamsOfRunTvm = .init(message: message,
+                                                                   account: boc,
+                                                                   execution_options: nil,
+                                                                   abi: TSDKAbi(type: .Serialized, value: abi),
+                                                                   boc_cache: nil,
+                                                                   return_updated_account: nil)
+                    client.tvm.run_tvm(paramsOfRunTvm) { response in
+                        if let error = response.error {
+                            fatalError( error.localizedDescription )
+                        }
+                        if response.finished {
+                            let tvmResult: TSDKResultOfRunTvm = response.result!
+                            guard let output: String = tvmResult.decoded?.output?.toJSON()
+                            else { fatalError( "output not defined" ) }
+                            functionResult = output
+                            group.leave()
+                        }
+                    }
+                }
+            }
+            group.wait()
+
+            let stdout: FileHandle = FileHandle.standardOutput
+            stdout.write(functionResult.trimmingCharacters(in: .whitespacesAndNewlines).data(using: .utf8) ?? Data())
+            return functionResult
         }
     }
 }
