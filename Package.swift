@@ -1,4 +1,4 @@
-// swift-tools-version:5.3
+// swift-tools-version:5.5
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -17,7 +17,7 @@ var packageDependencies: [Package.Dependency] = [
 
 let package = Package(
     name: "validator-tool",
-    platforms: [.macOS(.v11)],
+    platforms: [.macOS(.v12)],
     dependencies: packageDependencies,
     targets: [
         .target(
