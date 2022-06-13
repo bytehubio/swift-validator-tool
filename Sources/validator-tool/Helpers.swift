@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import TonClientSwift
+import EverscaleClientSwift
 
 var pathToRootDirectory: String {
     /// Please, set custom working directory to project folder for your xcode scheme. This is necessary for the relative path "./" to the project folders to work.

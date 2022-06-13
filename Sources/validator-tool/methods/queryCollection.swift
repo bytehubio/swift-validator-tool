@@ -7,7 +7,7 @@
 
 import Foundation
 import ArgumentParser
-import TonClientSwift
+import EverscaleClientSwift
 import FileUtils
 
 extension ValidatorTool {

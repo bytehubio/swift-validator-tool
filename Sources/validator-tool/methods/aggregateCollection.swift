@@ -7,7 +7,7 @@
 
 import Foundation
 import ArgumentParser
-import TonClientSwift
+import EverscaleClientSwift
 
 extension ValidatorTool {
     struct AggregateCollection: ParsableCommand, ValidatorToolOptionsPrtcl {

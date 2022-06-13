@@ -10,9 +10,9 @@ var packageDependencies: [Package.Dependency] = [
 ]
 
 #if os(Linux)
-    packageDependencies.append(.package(name: "TonClientSwift", url: "https://github.com/nerzh/ton-client-swift", .upToNextMajor(from: "1.1.10")))
+    packageDependencies.append(.package(name: "EverscaleClientSwift", url: "https://github.com/nerzh/everscale-client-swift", .upToNextMajor(from: "1.6.0")))
 #else
-    packageDependencies.append(.package(name: "TonClientSwift", path: "/Users/nerzh/mydata/swift_projects/ton-client-swift"))
+    packageDependencies.append(.package(name: "EverscaleClientSwift", path: "/Users/nerzh/mydata/swift_projects/everscale-client-swift"))
 #endif
 
 let package = Package(
@@ -23,7 +23,7 @@ let package = Package(
         .target(
             name: "validator-tool",
             dependencies: [
-                .product(name: "TonClientSwift", package: "TonClientSwift"),
+                .product(name: "EverscaleClientSwift", package: "EverscaleClientSwift"),
                 .product(name: "SwiftRegularExpression", package: "SwiftRegularExpression"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "FileUtils", package: "FileUtils"),
