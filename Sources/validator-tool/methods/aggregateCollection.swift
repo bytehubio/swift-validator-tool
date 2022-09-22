@@ -8,6 +8,9 @@
 import Foundation
 import ArgumentParser
 import EverscaleClientSwift
+import SwiftExtensionsPack
+
+
 
 extension ValidatorTool {
     struct AggregateCollection: ParsableCommand, ValidatorToolOptionsPrtcl {
@@ -39,7 +42,7 @@ extension ValidatorTool {
                                                                                      filter: try paramsJsonToDictionary(filter).toAnyValue(),
                                                                                      fields: inputFieldsToModel(fields)?.fields)
 
-            client.net.aggregate_collection(paramsOfAggregateCollection) { response in
+            try client.net.aggregate_collection(paramsOfAggregateCollection) { response in
                 if let error = response.error {
                     fatalError( error.localizedDescription )
                 }

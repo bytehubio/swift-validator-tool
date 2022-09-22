@@ -9,6 +9,7 @@ import Foundation
 import ArgumentParser
 import EverscaleClientSwift
 import FileUtils
+import SwiftExtensionsPack
 
 extension ValidatorTool {
     struct SendMessage: ParsableCommand, ValidatorToolOptionsPrtcl {
@@ -63,7 +64,7 @@ extension ValidatorTool {
                                                                          signer: signer,
                                                                          processing_try_index: nil)
             let paramsOfProcessMessage: TSDKParamsOfProcessMessage = .init(message_encode_params: paramsOfEncodeMessage, send_events: false)
-            client.processing.process_message(paramsOfProcessMessage)
+            try client.processing.process_message(paramsOfProcessMessage)
             { (response: TSDKBindingResponse<TSDKResultOfProcessMessage, TSDKClientError>) in
                 if let error = response.error {
                     fatalError( error.localizedDescription )

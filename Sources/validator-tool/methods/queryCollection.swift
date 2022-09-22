@@ -9,6 +9,7 @@ import Foundation
 import ArgumentParser
 import EverscaleClientSwift
 import FileUtils
+import SwiftExtensionsPack
 
 extension ValidatorTool {
     struct QueryCollection: ParsableCommand, ValidatorToolOptionsPrtcl {
@@ -46,7 +47,7 @@ extension ValidatorTool {
                                                                              result: result,
                                                                              order: inputOrderToModel(order)?.order,
                                                                              limit: limit)
-            client.net.query_collection(paramsOfQueryCollection) { response in
+            try client.net.query_collection(paramsOfQueryCollection) { response in
                 if let error = response.error {
                     fatalError( error.localizedDescription )
                 }

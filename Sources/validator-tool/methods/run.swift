@@ -9,6 +9,7 @@ import Foundation
 import ArgumentParser
 import EverscaleClientSwift
 import FileUtils
+import SwiftExtensionsPack
 
 extension ValidatorTool {
     public struct Run: ParsableCommand, ValidatorToolOptionsPrtcl {
@@ -54,7 +55,7 @@ extension ValidatorTool {
                                                                                  result: "boc",
                                                                                  timeout: nil)
 
-            client.net.wait_for_collection(paramsOfWaitForCollection) { response in
+            try client.net.wait_for_collection(paramsOfWaitForCollection) { response in
                 if let error = response.error {
                     fatalError( error.localizedDescription )
                 }
@@ -83,7 +84,7 @@ extension ValidatorTool {
                             processing_try_index: nil
                         )
 
-                        client.abi.encode_message(paramsOfEncodeMessage) { response in
+                        try client.abi.encode_message(paramsOfEncodeMessage) { response in
                             if let error = response.error {
                                 fatalError( error.localizedDescription )
                             }
@@ -97,7 +98,7 @@ extension ValidatorTool {
                                                                                return_updated_account: nil)
 
 
-                                client.tvm.run_tvm(paramsOfRunTvm) { response in
+                                try client.tvm.run_tvm(paramsOfRunTvm) { response in
                                     if let error = response.error {
                                         fatalError( error.localizedDescription )
                                     }
@@ -152,7 +153,7 @@ extension ValidatorTool {
                 processing_try_index: nil
             )
 
-            client.abi.encode_message(paramsOfEncodeMessage) { response in
+            try client.abi.encode_message(paramsOfEncodeMessage) { response in
                 if let error = response.error {
                     fatalError( error.localizedDescription )
                 }
@@ -164,7 +165,7 @@ extension ValidatorTool {
                                                                    abi: TSDKAbi(type: .Serialized, value: abi),
                                                                    boc_cache: nil,
                                                                    return_updated_account: nil)
-                    client.tvm.run_tvm(paramsOfRunTvm) { response in
+                    try client.tvm.run_tvm(paramsOfRunTvm) { response in
                         if let error = response.error {
                             fatalError( error.localizedDescription )
                         }

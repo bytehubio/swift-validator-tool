@@ -9,32 +9,33 @@ import Foundation
 import ArgumentParser
 import EverscaleClientSwift
 import FileUtils
+import SwiftExtensionsPack
 
 extension ValidatorTool {
     struct Message: ParsableCommand, ValidatorToolOptionsPrtcl {
-
-            @OptionGroup var options: ValidatorToolOptions
-
+        
+        @OptionGroup var options: ValidatorToolOptions
+        
         @Option(name: [.long, .customShort("m")], help: "Calling method")
         var method: String
-
+        
         @Option(name: [.long, .customShort("p")], help: "Params")
         var paramsJSON: String = "{}"
-
+        
         @Option(name: [.long, .customShort("b")], help: "Path to abi file")
         var abiPath: String
-
+        
         public func run() throws {
             try makeResult()
         }
-
+        
         @discardableResult
         func makeResult() throws -> String {
             try setClient(options: options)
             var functionResult: String = ""
             let group: DispatchGroup = .init()
             group.enter()
-
+            
             var params: AnyValue!
             do {
                 params = try paramsJsonToDictionary(paramsJSON).toAnyValue()
@@ -50,7 +51,7 @@ extension ValidatorTool {
                                                                                  is_internal: true,
                                                                                  signer: signer,
                                                                                  processing_try_index: nil)
-            client.abi.encode_message_body(paramsOfEncodeMessageBody)
+            try client.abi.encode_message_body(paramsOfEncodeMessageBody)
             { (response: TSDKBindingResponse<TSDKResultOfEncodeMessageBody, TSDKClientError>) in
                 if let error = response.error {
                     fatalError( error.localizedDescription )
@@ -62,18 +63,10 @@ extension ValidatorTool {
                 }
             }
             group.wait()
-
+            
             let stdout: FileHandle = FileHandle.standardOutput
             stdout.write(functionResult.trimmingCharacters(in: .whitespacesAndNewlines).data(using: .utf8) ?? Data())
             return functionResult
-        }
-
-        private func paramsJsonToDictionary(_ params: String) throws -> [String: Any] {
-            guard let data: Data = params.data(using: .utf8)
-            else { fatalError("Bad params json, it must be valid json") }
-            let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String : Any]
-
-            return json ?? [:]
         }
     }
 }
