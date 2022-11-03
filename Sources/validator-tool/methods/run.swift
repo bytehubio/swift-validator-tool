@@ -27,9 +27,9 @@ extension ValidatorTool {
 
         @Option(name: [.long, .customShort("a")], help: "Path to abi file")
         var abiPath: String
-
-        @Option(name: [.long, .customShort("b")], help: "Boc")
-        var boc: String = ""
+        
+        @Option(wrappedValue: "", name: [.long, .customShort("b")], help: "Boc")
+        var boc: String
 
         public func run() throws {
             if boc.isEmpty {
