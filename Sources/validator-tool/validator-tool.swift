@@ -124,4 +124,11 @@ struct ValidatorTool: ParsableCommand {
     )
 }
 
-ValidatorTool.main()
+
+@main
+public struct validator_tool {
+    
+    public static func main() {
+        ValidatorTool.main()
+    }
+}

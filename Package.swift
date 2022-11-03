@@ -20,7 +20,7 @@ let package = Package(
     platforms: [.macOS(.v12)],
     dependencies: packageDependencies,
     targets: [
-        .target(
+        .executableTarget(
             name: "validator-tool",
             dependencies: [
                 .product(name: "EverscaleClientSwift", package: "EverscaleClientSwift"),
@@ -37,5 +37,6 @@ let package = Package(
                 .product(name: "FileUtils", package: "FileUtils")
             ]
         ),
-    ]
+    ],
+    swiftLanguageVersions: [SwiftVersion.version("5.4")]
 )
