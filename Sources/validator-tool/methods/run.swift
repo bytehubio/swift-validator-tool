@@ -28,11 +28,11 @@ extension ValidatorTool {
         @Option(name: [.long, .customShort("a")], help: "Path to abi file")
         var abiPath: String
         
-        @Option(wrappedValue: "", name: [.long, .customShort("b")], help: "Boc")
-        var boc: String
+        @Option(name: [.long, .customShort("b")], help: "Boc")
+        var boc: String = "none"
 
         public func run() throws {
-            if boc.isEmpty {
+            if boc == "none" {
                 try makeResult()
             } else {
                 try makeResultWithBoc()
