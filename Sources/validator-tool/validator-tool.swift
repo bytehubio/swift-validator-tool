@@ -58,17 +58,23 @@ extension ValidatorToolOptionsPrtcl {
     func makeConfig(options: ValidatorToolOptions) throws -> TSDKClientConfig {
         var endpoints: [String]? = nil
         let envJson: [String: Any] = try readEnvVariables()
+        let config: [String: Any]? = envJson["config"] as? [String: Any]
         if options.endpoints == nil {
-            guard let endpointsMap: [String: [String]] = envJson["endpoints_map"] as? [String: [String]],
-                  let envEndpoints: [String] = endpointsMap[options.url]
-            else { fatalError("Bad config json. endpoints_map not defined or \(options.url) endpoints array not found") }
-            endpoints = envEndpoints
+            if let defaultEndpoints: [String] = config?["endpoints"] as? [String] {
+                endpoints = defaultEndpoints
+            } else if let url: String = config?["url"] as? String {
+                endpoints = [url]
+            } else if let mapEndpoints: [String] = (envJson["endpoints_map"] as? [String: [String]])?[options.url] {
+                endpoints = mapEndpoints
+            } else {
+                fatalError("Bad config json. endpoints_map not defined or \(options.url) endpoints array not found")
+            }
         } else if !options.endpoints!.isEmpty {
             endpoints = options.endpoints
         }
-        guard let workChain: Int32 = envJson["workChain"] as? Int32
+        guard let workChain: Int32 = config?["wc"] as? Int32
         else { fatalError("Bad config json. workChain not found") }
-
+        
         let networkConfig: TSDKNetworkConfig = .init(server_address: nil,
                                                      endpoints: endpoints,
                                                      max_reconnect_timeout: options.maxReconnectTimeout,
@@ -88,15 +94,18 @@ extension ValidatorToolOptionsPrtcl {
     }
 
     private func readEnvVariables() throws -> [String : Any] {
-        guard let configPath: String = ProcessInfo.processInfo.environment[envVariableName]
-        else { fatalError("Please set \(envVariableName) env variable with full path to config.json to your .profile etc") }
-        let configJSON: String = try FileUtils.readFile(URL(fileURLWithPath: configPath))
-        guard let data: Data = configJSON.data(using: .utf8)
-        else { fatalError("Bad json. Please check \(configPath) json file with configuration.") }
-        guard let json: [String : Any] = try JSONSerialization.jsonObject(with: data, options: []) as? [String : Any]
-        else { fatalError("Bad json. Please check \(configPath) json file with configuration.") }
+        if let configPath: String = ProcessInfo.processInfo.environment[envVariableName] ?? ProcessInfo.processInfo.environment[envTonosVariableName]
+        {
+            let configJSON: String = try FileUtils.readFile(URL(fileURLWithPath: configPath))
+            guard let data: Data = configJSON.data(using: .utf8)
+            else { fatalError("Bad json. Please check \(configPath) json file with configuration.") }
+            guard let json: [String : Any] = try JSONSerialization.jsonObject(with: data, options: []) as? [String : Any]
+            else { fatalError("Bad json. Please check \(configPath) json file with configuration.") }
 
-        return json
+            return json
+        } else {
+            fatalError("Please set \(envVariableName) or \(envTonosVariableName) env variable with full path to config.json to your .profile etc")
+        }
     }
 }
 

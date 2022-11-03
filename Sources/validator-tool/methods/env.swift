@@ -20,16 +20,19 @@ extension ValidatorTool {
 
         @discardableResult
         func makeResult() throws -> String {
-            guard let configPath: String = ProcessInfo.processInfo.environment[envVariableName]
-            else { fatalError("Please set \(envVariableName) env variable with full path to config.json to your .profile etc") }
-            let configJSON: String = try FileUtils.readFile(URL(fileURLWithPath: configPath))
-            guard let data: Data = configJSON.data(using: .utf8)
-            else { fatalError("Bad json. Please check \(configPath) json file with configuration.") }
-            guard let json: [String : Any] = try JSONSerialization.jsonObject(with: data, options: []) as? [String : Any]
-            else { fatalError("Bad json. Please check \(configPath) json file with configuration.") }
-            print("\(json)")
+            if let configPath: String = ProcessInfo.processInfo.environment[envVariableName] ?? ProcessInfo.processInfo.environment[envTonosVariableName]
+            {
+                let configJSON: String = try FileUtils.readFile(URL(fileURLWithPath: configPath))
+                guard let data: Data = configJSON.data(using: .utf8)
+                else { fatalError("Bad json. Please check \(configPath) json file with configuration.") }
+                guard let json: [String : Any] = try JSONSerialization.jsonObject(with: data, options: []) as? [String : Any]
+                else { fatalError("Bad json. Please check \(configPath) json file with configuration.") }
+                print("\(json)")
 
-            return "\(json)"
+                return "\(json)"
+            } else {
+                fatalError("Please set \(envVariableName) or \(envTonosVariableName) env variable with full path to config.json to your .profile etc")
+            }
         }
     }
 }

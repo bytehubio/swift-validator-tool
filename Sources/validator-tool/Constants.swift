@@ -7,4 +7,5 @@
 
 import Foundation
 
-let envVariableName = "SWIFT_VALIDATOR_TOOL_CONFIG"
+let envVariableName: String = "SWIFT_VALIDATOR_TOOL_CONFIG"
+let envTonosVariableName: String = "TONOSCLI_CONFIG"
