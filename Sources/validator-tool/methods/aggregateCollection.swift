@@ -10,8 +10,6 @@ import ArgumentParser
 import EverscaleClientSwift
 import SwiftExtensionsPack
 
-
-
 extension ValidatorTool {
     struct AggregateCollection: ParsableCommand, ValidatorToolOptionsPrtcl {
 
@@ -34,7 +32,7 @@ extension ValidatorTool {
         @discardableResult
         func makeResult() throws -> String {
             try setClient(options: options)
-            var functionResult: String = ""
+            nonisolated(unsafe) var functionResult: String = ""
             let group: DispatchGroup = .init()
             group.enter()
 

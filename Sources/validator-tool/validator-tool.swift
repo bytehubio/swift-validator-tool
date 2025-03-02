@@ -109,16 +109,16 @@ extension ValidatorToolOptionsPrtcl {
     }
 }
 
-struct ValidatorTool: ParsableCommand {
+struct ValidatorTool: ParsableCommand, @unchecked Sendable {
 
-    static var _client: TSDKClientModule?
+    nonisolated(unsafe) static var _client: TSDKClientModule?
 
     static var client: TSDKClientModule {
         if _client == nil { fatalError("_client is nil. Client is not defined") }
         return _client!
     }
 
-    static var configuration = CommandConfiguration(
+    nonisolated(unsafe) static var configuration = CommandConfiguration(
         abstract: "A utility",
         version: "1.0.0",
         subcommands: [

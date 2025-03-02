@@ -11,6 +11,25 @@ import EverscaleClientSwift
 import FileUtils
 import SwiftExtensionsPack
 
+final class BullshitActor3: @unchecked Sendable {
+    static let shared = BullshitActor3()
+    let lock = NSLock()
+    
+    private var _functionResult: String = "[]"
+    var functionResult: String {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return _functionResult
+        }
+        set {
+            lock.lock()
+            defer { lock.unlock() }
+            _functionResult = newValue
+        }
+    }
+}
+
 extension ValidatorTool {
     struct QueryCollection: ParsableCommand, ValidatorToolOptionsPrtcl {
 
@@ -38,7 +57,7 @@ extension ValidatorTool {
         @discardableResult
         func makeResult() throws -> String {
             try setClient(options: options)
-            var functionResult: String = ""
+            nonisolated(unsafe) var functionResult: String = ""
             let group: DispatchGroup = .init()
             group.enter()
 
@@ -52,7 +71,7 @@ extension ValidatorTool {
                     fatalError( error.localizedDescription )
                 }
                 if response.finished {
-                    functionResult = response.result!.result.toJson() ?? "[]"
+                    functionResult = response.result!.result.toJson ?? "[]"
                     group.leave()
                 }
             }

@@ -12,7 +12,7 @@ import FileUtils
 import SwiftExtensionsPack
 
 extension ValidatorTool {
-    public struct Run: ParsableCommand, ValidatorToolOptionsPrtcl {
+    public struct Run: ParsableCommand, ValidatorToolOptionsPrtcl, @unchecked Sendable {
 
         @OptionGroup var options: ValidatorToolOptions
 
@@ -42,7 +42,7 @@ extension ValidatorTool {
         @discardableResult
         func makeResult() throws -> String {
             try setClient(options: options)
-            var functionResult: String = ""
+            nonisolated(unsafe) var functionResult: String = ""
             let group: DispatchGroup = .init()
             group.enter()
 
@@ -70,7 +70,7 @@ extension ValidatorTool {
                         guard let boc: String = anyResult["boc"] as? String
                         else { fatalError("Receive result, but Boc not found") }
 
-                        let abi: AnyValue = readAbi(abiPath)
+                        nonisolated(unsafe) let abi: AnyValue = readAbi(abiPath)
                         let paramsOfEncodeMessage: TSDKParamsOfEncodeMessage = .init(
                             abi: .init(type: .Serialized, value: abi),
                             address: addr,
@@ -127,7 +127,7 @@ extension ValidatorTool {
         @discardableResult
         func makeResultWithBoc() throws -> String {
             try setClient(options: options)
-            var functionResult: String = ""
+            nonisolated(unsafe) var functionResult: String = ""
             let group: DispatchGroup = .init()
             group.enter()
 
@@ -139,7 +139,7 @@ extension ValidatorTool {
             }
 
 
-            let abi: AnyValue = readAbi(abiPath)
+            nonisolated(unsafe) let abi: AnyValue = readAbi(abiPath)
             let paramsOfEncodeMessage: TSDKParamsOfEncodeMessage = .init(
                 abi: .init(type: .Serialized, value: abi),
                 address: addr,

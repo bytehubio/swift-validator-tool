@@ -11,6 +11,7 @@ import EverscaleClientSwift
 import FileUtils
 import SwiftExtensionsPack
 
+
 extension ValidatorTool {
     struct SendMessage: ParsableCommand, ValidatorToolOptionsPrtcl {
 
@@ -38,7 +39,7 @@ extension ValidatorTool {
         @discardableResult
         func makeResult() throws -> String {
             try setClient(options: options)
-            var functionResult: String = ""
+            nonisolated(unsafe) var functionResult: String = ""
             let group: DispatchGroup = .init()
             group.enter()
 
@@ -74,7 +75,7 @@ extension ValidatorTool {
 //                    response.result!.decoded?.output?.toJSON()
 //                    let boc: String = response.result!
 //                    functionResult = boc
-                    functionResult = response.result!.decoded?.output?.toJson() ?? ""
+                    functionResult = response.result!.decoded?.output?.toJson ?? ""
 //                    dump(response.result!)
 
                     group.leave()
@@ -88,7 +89,7 @@ extension ValidatorTool {
         }
 
         private func keysJsonToKeyPair(_ path: String) throws -> TSDKKeyPair {
-            let json = try FileUtils.readFile(URL(fileURLWithPath: path))
+            let json: String = try FileUtils.readFile(URL(fileURLWithPath: path))
             guard let data: Data = json.data(using: .utf8)
             else { fatalError("Bad params json, it must be valid json") }
             let dict = try JSONSerialization.jsonObject(with: data, options: []) as? [String : Any]
