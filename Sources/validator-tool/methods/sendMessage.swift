@@ -97,7 +97,7 @@ extension ValidatorTool {
                   let `public`: String = dict?["public"] as? String
             else { fatalError("Bad keys file. Public or Secret not found.") }
 
-            return .init(public: `public`, secret: secret)
+            return .init(public_key: `public`, secret: secret)
         }
     }
 }

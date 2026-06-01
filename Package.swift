@@ -4,13 +4,13 @@
 import PackageDescription
 
 var packageDependencies: [Package.Dependency] = [
-    .package(url: "https://github.com/nerzh/swift-regular-expression.git", .upToNextMajor(from: "0.2.3")),
+    .package(url: "https://github.com/nerzh/swift-regular-expression.git", .upToNextMajor(from: "0.2.4")),
     .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.4.4")),
     .package(url: "https://github.com/nerzh/SwiftFileUtils", .upToNextMinor(from: "1.3.0")),
 ]
 
 //#if os(Linux)
-    packageDependencies.append(.package(url: "https://github.com/nerzh/everscale-client-swift", .upToNextMajor(from: "1.6.0")))
+    packageDependencies.append(.package(url: "https://github.com/nerzh/everscale-client-swift", .upToNextMajor(from: "1.16.0")))
 //#else
 //    packageDependencies.append(.package(name: "EverscaleClientSwift", path: "/Users/nerzh/mydata/swift_projects/everscale-client-swift"))
 //#endif
